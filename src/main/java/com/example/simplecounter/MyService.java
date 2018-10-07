@@ -15,15 +15,17 @@ import java.util.TimerTask;
 
 public class MyService extends Service {
     static String LOG_TAG = "serviceLogs";
-    static final String ACTION = "com.example.simplecounter.display";
-    Intent intent;
+    static final String ACTION_VAL = "com.example.simplecounter.display";
+    //static final String ACTION_RESTART = "com.example.simplecounter.Restart"; рестарт сервис
+    Intent intentValue, intentRestart;
     Timer timer;
 
     @Override
     public void onCreate() {
         super.onCreate();
         Log.d(LOG_TAG, "onCreate done");
-        intent = new Intent(ACTION);
+        intentValue = new Intent(ACTION_VAL);
+        //intentRestart = new Intent(ACTION_RESTART);//рестарт сервис
     }
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -37,6 +39,7 @@ public class MyService extends Service {
         super.onDestroy();
         timer.cancel();
         Log.d(LOG_TAG, "onDestroy done");
+        //sendBroadcast(intentRestart);//рестарт сервис
     }
     @Nullable
     @Override
@@ -66,8 +69,8 @@ public class MyService extends Service {
                     db.close();
 
                     Log.d(LOG_TAG, String.valueOf(units));
-                    intent.putExtra("value", String.valueOf(units));
-                    sendBroadcast(intent);
+                    intentValue.putExtra("value", String.valueOf(units));
+                    sendBroadcast(intentValue);
                 }
             }).start();
             units++;

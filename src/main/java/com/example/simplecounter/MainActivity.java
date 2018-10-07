@@ -43,13 +43,22 @@ public class MainActivity extends AppCompatActivity {
             });
         }
     };
+    //рестарт сервис
+   /*private BroadcastReceiver broadcastRestart = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, final Intent intent) {
+            Log.d(LOG_TAG, "Restart done");
+            context.startService(new Intent(context, MyService.class));;
+        }
+    };*/
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        registerReceiver(broadcastReceiver, new IntentFilter(MyService.ACTION));
+        registerReceiver(broadcastReceiver, new IntentFilter(MyService.ACTION_VAL));
+        //registerReceiver(broadcastRestart, new IntentFilter(MyService.ACTION_RESTART));//рестарт сервис
         newService = new MyService();
         newIntent = new Intent(this, newService.getClass());
         startService(newIntent);
@@ -66,8 +75,7 @@ public class MainActivity extends AppCompatActivity {
         db.close();
 
         stopService(newIntent);
-        startService(newIntent);
-
+        startService(newIntent);//закомментить если тестируем рестарт сервиса
     }
 
 }
