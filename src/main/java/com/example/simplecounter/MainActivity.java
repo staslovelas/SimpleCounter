@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -17,6 +18,7 @@ public class MainActivity extends AppCompatActivity {
     MyService newService;
     Intent newIntent;
     DBHelper newHelper;
+    SQLiteDatabase db;
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -25,7 +27,16 @@ public class MainActivity extends AppCompatActivity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    counter = intent.getStringExtra("value");
+                    db = newHelper.getWritableDatabase();
+                    String cnt = intent.getStringExtra("value");
+                    Cursor cursor = db.rawQuery("select * from " + DBHelper.TABLE_NAME, null);
+                        if(cursor.moveToLast()){
+                            counter = cursor.getString(1);
+                        }
+
+                        db.close();
+                        cursor.close();
+
                     TextView txtCnt = (TextView) findViewById(R.id.txtCnt);
                     txtCnt.setText(counter);
                 }
@@ -45,14 +56,14 @@ public class MainActivity extends AppCompatActivity {
 
         newHelper = new DBHelper(this);
 
+
         Log.d(LOG_TAG, "onCreate done");
     }
     public void onClickReset(View v){
-        SQLiteDatabase db = newHelper.getWritableDatabase();
-
+        db = newHelper.getWritableDatabase();
         int clearCount = db.delete(DBHelper.TABLE_NAME, null, null);
         Log.d(LOG_TAG, "RESET done: deleted rows count = " + clearCount);
-        newHelper.close();
+        db.close();
 
         stopService(newIntent);
         startService(newIntent);

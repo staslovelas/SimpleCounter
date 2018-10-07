@@ -52,15 +52,6 @@ public class MyService extends Service {
 
         CounterTask() {
             helper = new DBHelper(getApplicationContext());
-            db = helper.getWritableDatabase();
-
-            try (Cursor cursor = db.rawQuery("select * from " + DBHelper.TABLE_NAME, null)) {
-                if(cursor.moveToLast()){
-                    units = Integer.valueOf(cursor.getString(1));
-                }
-            } finally {
-                db.close();
-            }
         }
 
         @Override
@@ -68,16 +59,15 @@ public class MyService extends Service {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    Log.d(LOG_TAG, String.valueOf(units));
-                    intent.putExtra("value", String.valueOf(units));
-                    sendBroadcast(intent);
-
                     db = helper.getWritableDatabase();
                     ContentValues cv = new ContentValues();
                     cv.put(DBHelper.KEY_VALUE, units);
                     db.insert(DBHelper.TABLE_NAME, null, cv);
                     db.close();
 
+                    Log.d(LOG_TAG, String.valueOf(units));
+                    intent.putExtra("value", String.valueOf(units));
+                    sendBroadcast(intent);
                 }
             }).start();
             units++;
