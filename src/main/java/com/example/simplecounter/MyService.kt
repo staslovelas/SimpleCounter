@@ -15,6 +15,8 @@ import java.util.TimerTask
 class MyService : Service() {
     internal var intentValue: Intent? = null
     internal var timer: Timer? = null
+    var helper: DBHelper? = null
+    var db: SQLiteDatabase? = null
 
     override fun onCreate() {
         super.onCreate()
@@ -30,9 +32,12 @@ class MyService : Service() {
     }
 
     override fun onDestroy() {
+        db = helper?.writableDatabase
+        val clearCount = db?.delete(DBHelper.TABLE_NAME, null, null)
+        db?.close()
         super.onDestroy()
         timer?.cancel()
-        Log.d(LOG_TAG, "onDestroy done")
+        Log.d(LOG_TAG, "onDestroy done: deleted rows count = $clearCount")
     }
 
     override fun onBind(intent: Intent): IBinder? {
@@ -41,8 +46,7 @@ class MyService : Service() {
     }
 
     internal inner class CounterTask : TimerTask() {
-        var helper: DBHelper
-        var db: SQLiteDatabase? = null
+
         var units: Int = 0
 
         init {
@@ -51,14 +55,14 @@ class MyService : Service() {
 
         override fun run() {
             Thread(Runnable {
-                db = helper.writableDatabase
+                db = helper?.writableDatabase
                 val cv = ContentValues()
                 cv.put(DBHelper.KEY_VALUE, units)
                 db?.insert(DBHelper.TABLE_NAME, null, cv)
                 db?.close()
 
                 Log.d(LOG_TAG, units.toString())
-                intentValue!!.putExtra("value", units.toString())
+                //intentValue!!.putExtra("value", units.toString())
                 sendBroadcast(intentValue)
             }).start()
             units++

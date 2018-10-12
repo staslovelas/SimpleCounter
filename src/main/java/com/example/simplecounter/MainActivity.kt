@@ -24,18 +24,16 @@ class MainActivity : AppCompatActivity() {
 
             runOnUiThread {
                 db = newHelper?.writableDatabase
-                val cnt = intent.getStringExtra("value")
+                //val cnt = intent.getStringExtra("value")
                 val cursor = db?.rawQuery("select * from " + DBHelper.TABLE_NAME, null)
                 if (cursor!!.moveToLast()) {
                     counter = cursor.getString(1)
                 }
-
                 db?.close()
                 cursor.close()
-
-                val txtCnt = findViewById<View>(R.id.txtCnt) as TextView
-                txtCnt.text = counter
             }
+            val txtCnt = findViewById<View>(R.id.txtCnt) as TextView
+            txtCnt.text = counter
         }
     }
 
@@ -49,17 +47,19 @@ class MainActivity : AppCompatActivity() {
         startService(newIntent)
 
         newHelper = DBHelper(this)
-
+        db = newHelper?.writableDatabase
 
         Log.d(LOG_TAG, "onCreate done")
     }
 
-    fun onClickReset(v: View) {
-        db = newHelper?.writableDatabase
-        val clearCount = db?.delete(DBHelper.TABLE_NAME, null, null)
-        Log.d(LOG_TAG, "RESET done: deleted rows count = $clearCount")
-        db?.close()
+    override fun onDestroy() {
+        stopService(newIntent)
+        super.onDestroy()
+        Log.d(LOG_TAG, "onDestroy done")
 
+    }
+
+    fun onClickReset(v: View) {
         stopService(newIntent)
         startService(newIntent)
     }
